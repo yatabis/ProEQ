@@ -1,0 +1,12 @@
+output         = { expression }.
+
+expression     = function_call
+               | raw_expression
+
+function_call  = function_name "(" parameter_list ")"
+
+parameter_list = [parameter { "," parameter } ]
+
+parameter      = expression
+
+raw_expression = { char }
