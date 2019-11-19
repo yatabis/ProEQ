@@ -108,7 +108,9 @@ class Parser {
         stack += this.parameter()
       }
     }
-    params.push(stack)
+    if (stack !== '') {
+      params.push(stack)
+    }
     return params
   }
 
