@@ -43,9 +43,16 @@ const NODE_TYPE = {
   func: 1,
 }
 
-let local_functions = {
-  par: (token) => '\\left( ' + token.join(' ') + ' \\right)'
+const large_operations = {
+  par: (token) => `\\left( ${token.join(' ')} \\right)`,
+  sum: (token) => `\\sum${token.length>1 ? `_{${token[1]}}` : ''}${token.length>2 ? `^{${token[2]}}` : ''}{${token[0]}}`,
+  int: (token) => `\\int${token.length>1 ? `_{${token[1]}}` : ''}${token.length>2 ? `^{${token[2]}}` : ''}{${token[0]}}`,
+  lim: (token) => `\\lim${token.length>1 ? `_{${token[1]}}` : ''}{${token[0]}}`,
 }
+
+let user_defined = {}
+
+const local_functions = {...large_operations, ...user_defined}
 
 class Node {
   constructor(type, name, params = []) {
@@ -68,6 +75,9 @@ class Node {
             tex_string += '{'
             tex_string += p
             tex_string += '}'
+          }
+          if (this.params.length === 0) {
+            tex_string += ' '
           }
           return tex_string
         }
@@ -150,6 +160,7 @@ class Parser {
 
 const pro_eq = (input) => {
   const lexer = new Lexer(input)
+  // console.log(lexer.token)
   const parser = new Parser(lexer.token)
   return parser.ast.join(' ')
 }
