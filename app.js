@@ -62,7 +62,9 @@ const large_operations = {
 
 let user_defined = {}
 
-const local_functions = {...large_operations, ...user_defined}
+const local_functions = () => {
+  return {...large_operations, ...user_defined}
+}
 
 class Node {
   constructor(type, name, params = []) {
@@ -77,8 +79,8 @@ class Node {
       case NODE_TYPE.text:
         return this.name
       case NODE_TYPE.func:
-        if (this.name in local_functions) {
-          return local_functions[this.name](this.params)
+        if (this.name in local_functions()) {
+          return local_functions()[this.name](this.params)
         } else {
           let tex_string = '\\' + this.name
           for (const p of this.params) {
@@ -168,7 +170,14 @@ class Parser {
   }
 
   definition() {
+    const name = this.current()
     this.count++
+    this.count++
+    let defined = []
+    while (!this.break()) {
+      defined.push(this.expression())
+    }
+    user_defined[name] = () => defined.join(' ')
   }
 
   line() {
