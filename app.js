@@ -238,3 +238,15 @@ const app = new Vue({
     MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'math'])
   }
 })
+
+$('#btn-copy').click(function() {
+  document.getSelection().removeAllRanges()
+  document.getSelection().selectAllChildren(document.getElementById('tex'))
+  document.execCommand('copy')
+  const btn = $(this)
+
+  btn.tooltip('show')
+  setTimeout(function(){btn.tooltip('hide')}, 500)
+
+  document.getSelection().removeAllRanges()
+})
