@@ -1,6 +1,10 @@
-const identifier = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split('')
+const identifier = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_".split('')
+const is_newline = token => token === '\n'
 const is_whitespace = token => token === ' '
 const is_comma = token => token === ','
+const is_colon = token => token === ':'
+const is_equal = token => token === '='
+const is_define = token => token === ':='
 const is_parentheses_begin = token => token === '('
 const is_parentheses_end = token => token === ')'
 const is_parentheses = token => is_parentheses_begin(token) || is_parentheses_end(token)
@@ -26,6 +30,12 @@ class Lexer {
   tokenize() {
     for (const s of this.stream) {
       if (is_whitespace(s)) {
+        this.add_token()
+      } else if (is_colon(s)) {
+        this.add_token()
+        this.stack += s
+      } else if (is_equal(s) && this.stack === ':') {
+        this.stack += s
         this.add_token()
       } else if (is_comma(s) || is_parentheses(s) || is_braces(s) || is_not_identifier(s)) {
         this.add_token()
@@ -102,6 +112,10 @@ class Parser {
     return this.token[this.count + 1]
   }
 
+  break() {
+    return is_newline(this.current()) || this.count >= this.num
+  }
+
   parameter() {
     return this.expression()
   }
@@ -109,7 +123,7 @@ class Parser {
   parameter_list() {
     let params = []
     let stack = ''
-    while (this.count < this.num && !is_parentheses_end(this.current())) {
+    while (!is_parentheses_end(this.current()) && !this.break()) {
       if (is_comma(this.current())) {
         params.push(stack)
         stack = ''
@@ -148,13 +162,46 @@ class Parser {
   }
 
   output() {
-    while (this.count < this.num) {
+    while (!this.break()) {
       this.ast.push(this.expression())
     }
   }
 
+  definition() {
+    this.count++
+  }
+
+  line() {
+    let now = this.count
+    let is_definition = false
+    while (!this.break()) {
+      if (is_define(this.current())) {
+        is_definition = true
+        break
+      }
+      this.count++
+    }
+    this.count = now
+    if (is_definition) {
+      this.definition()
+    } else {
+      this.output()
+    }
+
+    if (is_newline(this.current())) {
+      this.ast.push('\\\\')
+    }
+    this.count++
+  }
+
+  input() {
+    while (this.count < this.num) {
+      this.line()
+    }
+  }
+
   parse() {
-    this.output()
+    this.input()
   }
 }
 
@@ -162,6 +209,7 @@ const pro_eq = (input) => {
   const lexer = new Lexer(input)
   // console.log(lexer.token)
   const parser = new Parser(lexer.token)
+  // console.log(parser.ast)
   return parser.ast.join(' ')
 }
 

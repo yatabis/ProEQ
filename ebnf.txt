@@ -1,12 +1,27 @@
+input          = [line {"\n" line}].
+
+line           = definition.
+               | output.
+
+definition     = identifier ":=" expression.
+
+identifier     = { number | letter | "_" }.
+
+number         = /[0-9]/
+
+letter         = /[A-Za-z]/
+
+expression     = function_call.
+               | raw_expression.
+
+function_call  = function_name "(" parameter_list ")".
+
+function_name  = identifier.
+
+parameter_list = [parameter { "," parameter } ].
+
+parameter      = expression.
+
+raw_expression = { char }.
+
 output         = { expression }.
-
-expression     = function_call
-               | raw_expression
-
-function_call  = function_name "(" parameter_list ")"
-
-parameter_list = [parameter { "," parameter } ]
-
-parameter      = expression
-
-raw_expression = { char }
