@@ -232,6 +232,13 @@ const app = new Vue({
       return pro_eq(this.raw_text)
     },
   },
+  mounted: function () {
+    // document.getElementById('math').innerText = '$$' + this.tex_text + '$$'
+    // MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'math'])
+    this.raw_text = 'e := mathrm(e)\n' +
+    'i := mathrm(i)\n' +
+    'e^{i() theta()} = cos(theta()) + i() sin(theta())'
+  },
   updated: function () {
     document.getElementById('math').innerText = '$$' + this.tex_text + '$$'
     MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'math'])
