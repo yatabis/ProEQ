@@ -9,7 +9,6 @@ const is_parentheses_begin = token => token === '('
 const is_parentheses_end = token => token === ')'
 const is_parentheses = token => is_parentheses_begin(token) || is_parentheses_end(token)
 const is_braces = token => token === '{' || token === '}'
-
 const is_not_identifier = token => identifier.indexOf(token) === -1
 
 class Lexer {
@@ -221,11 +220,10 @@ const pro_eq = (input) => {
   return parser.ast.join(' ')
 }
 
-
 const app = new Vue({
   el: '#app',
   data: {
-    raw_text: '',
+    raw_text: 'e := mathrm(e)\n' + 'i := mathrm(i)\n' + 'e^{i() theta()} = cos(theta()) + i() sin(theta())',
   },
   computed: {
     tex_text: function() {
@@ -233,11 +231,8 @@ const app = new Vue({
     },
   },
   mounted: function () {
-    // document.getElementById('math').innerText = '$$' + this.tex_text + '$$'
-    // MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'math'])
-    this.raw_text = 'e := mathrm(e)\n' +
-    'i := mathrm(i)\n' +
-    'e^{i() theta()} = cos(theta()) + i() sin(theta())'
+    document.getElementById('math').innerText = '$$' + this.tex_text + '$$'
+    MathJax.Hub.Queue(['Typeset', MathJax.Hub, 'math'])
   },
   updated: function () {
     document.getElementById('math').innerText = '$$' + this.tex_text + '$$'
@@ -250,9 +245,20 @@ $('#btn-copy').click(function() {
   document.getSelection().selectAllChildren(document.getElementById('tex'))
   document.execCommand('copy')
   const btn = $(this)
-
   btn.tooltip('show')
   setTimeout(function(){btn.tooltip('hide')}, 500)
-
   document.getSelection().removeAllRanges()
+})
+
+let editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+  mode: 'pro_eq',
+  value: document.getElementById('editor').value,
+  lineNumbers: true,
+  lineWrapping: true,
+  indentUnit: 4,
+  autoCloseBrackets: true,
+})
+editor.setSize('100%', '100%')
+editor.on('change', function () {
+  app.raw_text = editor.getValue()
 })

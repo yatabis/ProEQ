@@ -15,6 +15,7 @@
 
 #tex {
     border: thin solid #7A9399;
+    border-radius: 1%;
     padding-right: 5rem;
     grid-row: 1;
     grid-column: 2;
@@ -22,6 +23,7 @@
 
 #math {
     border: thin solid #7A9399;
+    border-radius: 1%;
     grid-row: 2;
     grid-column: 2;
 }
@@ -32,4 +34,11 @@
     left: calc(90vw + 5vh - 5rem);
     width: 5rem;
     height: 3rem;
+}
+
+.CodeMirror {
+    font-family: "Consolas", monospace;
+    font-size: 10pt;
+    border: thin solid #7A9399;
+    border-radius: 1%;
 }
