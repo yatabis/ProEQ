@@ -195,10 +195,9 @@ class Parser {
       this.definition()
     } else {
       this.output()
-    }
-
-    if (is_newline(this.current())) {
-      this.ast.push('\\\\')
+      if (is_newline(this.current())) {
+        this.ast.push('\\\\')
+      }
     }
     this.count++
   }
