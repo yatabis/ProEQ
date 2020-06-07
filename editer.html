@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <meta http-equiv='X-UA-Compatible' content='ie=edge'>
+  <title>エディター</title>
+  <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+  <script src="codemirror/lib/codemirror.js"></script>
+  <script src="codemirror/addon/edit/closebrackets.js"></script>
+</head>
+<body>
+<textarea name="editor" id="editor" cols="120" rows="50">テストてと</textarea>
+
+<script>
+  const editor = document.getElementById('editor')
+  const cm = CodeMirror.fromTextArea(editor, {
+    // mode: 'simple',
+    value: editor.value,
+    lineNumbers: true,
+    indentUnit: 4,
+    autoCloseBrackets: true
+  })
+</script>
+
+<style>
+  .CodeMirror {
+    font-family: "Consolas", monospace;
+    font-size: 10pt;
+  }
+</style>
+</body>
+</html>
