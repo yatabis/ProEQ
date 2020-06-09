@@ -3,7 +3,9 @@ input          = [line {"\n" line}].
 line           = definition.
                | output.
 
-definition     = identifier ":=" output.
+definition     = function_name ":=" output.
+
+function_name  = identifier
 
 identifier     = { number | letter | "_" }.
 
@@ -16,12 +18,10 @@ output         = { expression }.
 expression     = function_call.
                | raw_expression.
 
-function_call  = function_name "(" parameter_list ")".
-
-function_name  = identifier.
+function_call  = function_name ["(" parameter_list ")"].
 
 parameter_list = [parameter { "," parameter } ].
 
 parameter      = expression.
 
-raw_expression = { char }.
+raw_expression = { `unicode_character` }.

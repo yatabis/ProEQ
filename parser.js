@@ -52,18 +52,7 @@ const NODE_TYPE = {
   func: 1,
 }
 
-const large_operations = {
-  par: (token) => `\\left( ${token.join(' ')} \\right)`,
-  sum: (token) => `\\sum${token.length>1 ? `_{${token[1]}}` : ''}${token.length>2 ? `^{${token[2]}}` : ''}{${token[0]}}`,
-  int: (token) => `\\int${token.length>1 ? `_{${token[1]}}` : ''}${token.length>2 ? `^{${token[2]}}` : ''}{${token[0]}}`,
-  lim: (token) => `\\lim${token.length>1 ? `_{${token[1]}}` : ''}{${token[0]}}`,
-}
-
-let user_defined = {}
-
-const local_functions = () => {
-  return {...large_operations, ...user_defined}
-}
+let user_functions = {}
 
 class Node {
   constructor(type, name, params = []) {
@@ -78,19 +67,22 @@ class Node {
       case NODE_TYPE.text:
         return this.name
       case NODE_TYPE.func:
-        if (this.name in local_functions()) {
-          return local_functions()[this.name](this.params)
-        } else {
-          let tex_string = '\\' + this.name
-          for (const p of this.params) {
-            tex_string += '{'
-            tex_string += p
-            tex_string += '}'
-          }
-          if (this.params.length === 0) {
-            tex_string += ' '
-          }
-          return tex_string
+        switch (function_type_table[this.name]) {
+          case FUNCTION_TYPE.latex:
+            let tex_string = '\\' + this.name
+            for (const p of this.params) {
+              tex_string += '{'
+              tex_string += p
+              tex_string += '}'
+            }
+            if (this.params.length === 0) {
+              tex_string += ' '
+            }
+            return tex_string
+          case FUNCTION_TYPE.proeq:
+            return PROEQ_FUNCTIONS[this.name](this.params)
+          case FUNCTION_TYPE.user:
+            return user_functions[this.name](this.params)
         }
     }
   }
@@ -124,6 +116,9 @@ class Parser {
   parameter_list() {
     let params = []
     let stack = ''
+    if (is_parentheses_begin(this.current())) {
+      this.count++
+    }
     while (!is_parentheses_end(this.current()) && !this.break()) {
       if (is_comma(this.current())) {
         params.push(stack)
@@ -136,15 +131,15 @@ class Parser {
     if (stack !== '') {
       params.push(stack)
     }
+    this.count++
     return params
   }
 
   function_call() {
     const function_name = this.current()
     this.count++
-    this.count++
-    const node = new Node(NODE_TYPE.func, function_name, this.parameter_list())
-    this.count++
+    const parameter_list = is_parentheses_begin(this.current()) ? this.parameter_list() : []
+    const node = new Node(NODE_TYPE.func, function_name, parameter_list)
     return node.tex
   }
 
@@ -155,7 +150,7 @@ class Parser {
   }
 
   expression() {
-    if (is_parentheses_begin(this.next())) {
+    if (function_type_table[this.current()]) {
       return this.function_call()
     } else {
       return this.raw_expression()
@@ -176,7 +171,8 @@ class Parser {
     while (!this.break()) {
       defined.push(this.expression())
     }
-    user_defined[name] = () => defined.join(' ')
+    user_functions[name] = () => defined.join(' ')
+    function_type_table[name] = FUNCTION_TYPE.user
   }
 
   line() {
@@ -213,6 +209,8 @@ class Parser {
 }
 
 const pro_eq = (input) => {
+  user_functions = {}
+  refresh_function_table()
   const lexer = new Lexer(input)
   // console.log(lexer.token)
   const parser = new Parser(lexer.token)
@@ -223,7 +221,7 @@ const pro_eq = (input) => {
 const app = new Vue({
   el: '#app',
   data: {
-    raw_text: 'e := mathrm(e)\n' + 'i := mathrm(i)\n' + 'e^{i() theta()} = cos(theta()) + i() sin(theta())',
+    raw_text: 'e := mathrm(e)\n' + 'i := mathrm(i)\n' + 'e^{i theta} = cos(theta) + i sin(theta)\nlim(n, infty, sum(k = 0, n, a cdot r^k)) = frac(a, 1 - r) quad par(|r| < 1)',
   },
   computed: {
     tex_text: function() {
